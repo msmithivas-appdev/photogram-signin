@@ -18,6 +18,41 @@ class UsersController < ApplicationController
   
   end
 
+  def authenticate
+
+    un = params.fetch("input_username")
+    pw = params.fetch("input_pw")
+
+    user = User.where({ :username => un }).at(0)
+      if user == nil
+        redirect_to("/user_sign_in", { :alert => "No one by that name here" })
+      else
+        if user.authenticate(pw)
+          session.store(:user_id, user.id)
+          redirect_to("/", { :notice => "Welcome back!" + user.username })
+        else
+          redirect_to("/user_sign_in", { :alert => "Password does not match" })
+        end
+      end
+  
+  end
+
+
+  def signout
+    reset_session
+    redirect_to("/", { :notice => "See ya later!" })
+    # render({ :template => "users/index.html.erb"})
+  
+  end
+
+  def new_session_form
+    reset_session
+
+    # redirect_to("/", { :notice => "Welcome!" })
+
+    render({ :template => "users/signin_form.html.erb"})
+  
+  end
 
   def create
     user = User.new
@@ -27,6 +62,7 @@ class UsersController < ApplicationController
     user.password_confirmation = params.fetch("input_pw_conf")
     save_status = user.save
         if save_status == true
+          session.store(:user_id, user.id)
 
         redirect_to("/users/#{user.username}", { :notice => "Welcome, " + user.username + "!"})
         else
