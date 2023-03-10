@@ -12,14 +12,27 @@ class UsersController < ApplicationController
     render({ :template => "users/show.html.erb" })
   end
 
+  def new_registration_form
+  
+    render({ :template => "users/signup_form.html.erb"})
+  
+  end
+
+
   def create
     user = User.new
 
     user.username = params.fetch("input_username")
+    user.password = params.fetch("input_pw")
+    user.password_confirmation = params.fetch("input_pw_conf")
+    save_status = user.save
+        if save_status == true
 
-    user.save
+        redirect_to("/users/#{user.username}", { :notice => "Welcome, " + user.username + "!"})
+        else
+          redirect_to("/user_sign_up", { :alert => user.errors.full_messages.to_sentence })
+        end
 
-    redirect_to("/users/#{user.username}")
   end
 
   def update
